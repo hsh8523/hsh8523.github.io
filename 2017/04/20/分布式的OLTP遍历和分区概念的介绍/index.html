@@ -1,0 +1,917 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="TinkerPop,Graph,TP," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="描述  这项建议通过引入分布式OLTP、本地数据处理的方式将OLTP与OLAP合成为一个单一的框架，去掉了原来OLAP中的GraphComputer。从本质上说，这是遍历的分步查询路由框架的建议。他可以在一个集群中跨机器工作，或者工作在一个机器的多个线程中。以下的例子将通论在一种最复杂的情形：在一个集群中跨多个机器的分布式形式。   目前，OLTP为了能够执行图的遍历操作，它是通过拉取Vertx，">
+<meta name="keywords" content="TinkerPop,Graph,TP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式的OLTP遍历和分区概念的介绍">
+<meta property="og:url" content="https://hsh8523.github.io/2017/04/20/分布式的OLTP遍历和分区概念的介绍/index.html">
+<meta property="og:site_name" content="Troy">
+<meta property="og:description" content="描述  这项建议通过引入分布式OLTP、本地数据处理的方式将OLTP与OLAP合成为一个单一的框架，去掉了原来OLAP中的GraphComputer。从本质上说，这是遍历的分步查询路由框架的建议。他可以在一个集群中跨机器工作，或者工作在一个机器的多个线程中。以下的例子将通论在一种最复杂的情形：在一个集群中跨多个机器的分布式形式。   目前，OLTP为了能够执行图的遍历操作，它是通过拉取Vertx，">
+<meta property="og:image" content="https://hsh8523.github.io/2017/04/20/分布式的OLTP遍历和分区概念的介绍/distributed-oltp.png">
+<meta property="og:updated_time" content="2017-06-07T03:46:57.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式的OLTP遍历和分区概念的介绍">
+<meta name="twitter:description" content="描述  这项建议通过引入分布式OLTP、本地数据处理的方式将OLTP与OLAP合成为一个单一的框架，去掉了原来OLAP中的GraphComputer。从本质上说，这是遍历的分步查询路由框架的建议。他可以在一个集群中跨机器工作，或者工作在一个机器的多个线程中。以下的例子将通论在一种最复杂的情形：在一个集群中跨多个机器的分布式形式。   目前，OLTP为了能够执行图的遍历操作，它是通过拉取Vertx，">
+<meta name="twitter:image" content="https://hsh8523.github.io/2017/04/20/分布式的OLTP遍历和分区概念的介绍/distributed-oltp.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hsh8523.github.io/2017/04/20/分布式的OLTP遍历和分区概念的介绍/"/>
+
+
+
+
+
+  <title>分布式的OLTP遍历和分区概念的介绍 | Troy</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Troy</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">路漫漫，水迢迢</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hsh8523.github.io/2017/04/20/分布式的OLTP遍历和分区概念的介绍/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Troy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/10528403?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Troy">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">分布式的OLTP遍历和分区概念的介绍</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-20T10:17:35+08:00">
+                2017-04-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Graph/" itemprop="url" rel="index">
+                    <span itemprop="name">Graph</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="描述"><a href="#描述" class="headerlink" title="描述"></a>描述</h2><p>  这项建议通过引入分布式OLTP、本地数据处理的方式将OLTP与OLAP合成为一个单一的框架，去掉了原来OLAP中的GraphComputer。从本质上说，这是遍历的分步查询路由框架的建议。他可以在一个集群中跨机器工作，或者工作在一个机器的多个线程中。以下的例子将通论在一种最复杂的情形：在一个集群中跨多个机器的分布式形式。<br><br>   目前，OLTP为了能够执行图的遍历操作，它是通过拉取Vertx，Edge等信息到特定的机器上（或者线程中）来执行的。在OLAP中，为了达到数据本地处理的目的，它是通过克隆和分发traversal到集群中的所有机器中，各个机器的traversal使用Traversers来彼此交互信息的方式工作的。鉴于GremlinServer和RemoteTraversal的最新进展，可以将运行程序路由添加到OLTP，从而在Gremlin OLTP中实现Gremlin OLAP的计算范例，并在Gremlin OLAP中增加了一些附加的优势。<br><br>假设一个有4台机器集群和以下遍历：</p>
+ <figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">g.V(<span class="number">1</span>).out(‘knows’).has(‘age’,gt(<span class="number">20</span>)).out(‘likes’).values(‘name’)</div></pre></td></tr></table></figure>
+<p>每次有“步行”（邻接）时，Traverser可能不再访问当前机器本地的数据。 为了做数据本地查询路由，每个邻接都会进入一个PartitionStep。 上述遍历将通过集群进行克隆（通过字节码分发），其中“兄弟”PartitionSteps将使用RemoteConnection的相同协议（即通过称为PartitionConnection）彼此进行网络访问。 因此，给定4节点集群示例，上述遍历将被重叠如下。 请注意，partition（）不会是语言的新步骤，但这里仅提供了显示PartitionStrategy将PartitionSteps插入遍历的位置。<br><a id="more"></a><br> <figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">g.V(<span class="number">1</span>).out(‘knows’).partition().has(‘age’,gt(<span class="number">20</span>)).out(‘likes’).partition().values(‘name’).partition()</div><div class="line">                      |                                           |                         ^</div><div class="line">   __.out(‘knows’).partition().has(‘age’,gt(<span class="number">20</span>)).out(‘likes’).partition().values(‘name’).partition()</div><div class="line">                      |                                           |                         |</div><div class="line">   __.out(‘knows’).partition().has(‘age’,gt(<span class="number">20</span>)).out(‘likes’).partition().values(‘name’).partition()</div><div class="line">                      |                                           |                         |</div><div class="line">   __.out(‘knows’).partition().has(‘age’,gt(<span class="number">20</span>)).out(‘likes’).partition().values(‘name’).partition()</div></pre></td></tr></table></figure></p>
+<p> 顶部遍历称为“主遍历”，其他三个“工作者遍历”。 请注意，这与当前的Gremlin OLAP相同。 现在，主遍历将是结果的.next（）’遍历。 所以当“主遍历”是next（）’d时，g.V（1）将获取v [1]，然后取出它的传出知道邻接。 这些相邻的“参考顶点”将被馈送到第一个remote（）中，并且“路由算法”将确定簇中的特定顶点数据的哪里。 因此，partition（）（PartitionStep）用作路由器，将Traversers本地推送到数据。 最后，请注意，最终的PartitionSteps只能反馈到“主遍历”以进行最终聚合并返回给用户。<br><br> TinkerPop目前拥有所有的结构，使之成为可能：</p>
+<blockquote>
+<ul>
+<li>通过Traverser封装计算元数据。</li>
+<li>通过Traverser.detach（）和Traverser.attach（）分离Traversers并迁移/序列化它们的能力。</li>
+<li>ReferenceElement的概念使得遍历器只携带足够的信息来重新附加在远程站点。</li>
+<li>Bytecode和能够跨集群发送遍历。</li>
+<li>GremlinServer和Client / Cluster消息协议。</li>
+</ul>
+</blockquote>
+<p> PartitionStep是什么样子的？ 请看下面的评论,以下是这种模式的好处：</p>
+<blockquote>
+<ul>
+<li>Gremlin OLTP是Gremlin OLAP。 Gremlin OLAP的语义正是在这里提出的，但附加的好处是消息传递发生在分区/子图级别，而不是星形顶点级别。</li>
+<li>不需要SparkGraphComputer，因为GremlinServer现在扮演SparkServer的角色。 额外的好处，没有从图形数据库中提取数据，并在RDD或SequenceFile中重新表示。</li>
+<li>“本地子遍历”不再是“OLAP”的边界。 本地子遍历可以处理超过Star graph，但需要从远程机器拉取数据。 然而，给定一个好的图分割算法，本地子遍历很可能不会离开子图分区，因此将保持本地计算。</li>
+<li>架构中已经内置了故障转移。 如果无法访问PartitionStep，但机器的数据仍然可用（可能通过复制），则数据将通过简单的拉出来计算，而不是路由到“死点”的运行程序。</li>
+<li>Gremlin OLAP已经使用的Side-effects基础架构和reduce barries 步骤将自动适用于分布式的Gremlin OLTP。</li>
+<li>如果整个图表是整个集群中的热内存，那么分布式内存中的图形计算是可能的。 再次，在像Giraph / Spark / etc这样的分区上没有更多的线性扫描。 （GraphComputer）。</li>
+<li>如果transactions得到解决，则分发的OLTP Gremlin提供mutation功能（目前尚未为GraphComputer实现）。 那就是addV，addE，drop等等，则可以正常工作。 * Caveate，这个环境中的transactions在GremlinServer看来很困难。</li>
+</ul>
+</blockquote>
+<p> 那就是这样。 这可能是Gremlin OLAP的未来。 OLAP和OLTP之间的分离将会消失，代码库将被简化，在性能和表现力方面的计算增益将是巨大的。 这是一个很大的想法。</p>
+<p>  <img src="/2017/04/20/分布式的OLTP遍历和分区概念的介绍/distributed-oltp.png" width="650" height="437" align="center/"></p>
+<h2 id="其他信息"><a href="#其他信息" class="headerlink" title="其他信息"></a>其他信息</h2><blockquote>
+<ul>
+<li>Graph由Partitions组成。 一个Partition负责维护全局图的子图。 为了向后兼容，SinglePartition仅仅是Graph的包装。</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&gt;	<span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Graph</span> &#123;</span></div><div class="line">&gt; 	</div><div class="line">&gt;  <span class="keyword">public</span> <span class="keyword">default</span> Partitions getPartitions() &#123;</div><div class="line">&gt;    <span class="keyword">return</span> <span class="keyword">new</span> SingletonPartitions(<span class="keyword">this</span>);</div><div class="line">&gt;  &#125;</div><div class="line">&gt;&#125;</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<ul>
+<li>Partitions是与图相关联的所有分区的集合。 分区维护“散列算法”，它确定元素所在的分区。</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Partitions</span> &#123;</span></div><div class="line">  <span class="keyword">public</span> List&lt;Partition&gt; getPartitions();</div><div class="line">  <span class="keyword">public</span> Partition getPartition(<span class="keyword">final</span> Element element);</div><div class="line">&#125;</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<ul>
+<li>一个Partition是整个图的子图。 在邻接列表图系统中，分区将保留一组顶点及其入射边和属性。 应该可以流出与分区相关联的所有顶点/边，其中跨所有分区的所有迭代器集合等效于Graph.vertices（）/ Graph.edges（）。</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Partition</span> &#123;</span></div><div class="line">  <span class="keyword">public</span> <span class="keyword">boolean</span> contains(<span class="keyword">final</span> Element element);</div><div class="line">  <span class="keyword">public</span> Iterator&lt;Vertex&gt; vertices(<span class="keyword">final</span> Object... ids);</div><div class="line">  <span class="keyword">public</span> Iterator&lt;Edge&gt; edges(<span class="keyword">final</span> Object... ids);</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">interface</span> <span class="title">PhysicalPartition</span> <span class="keyword">extends</span> <span class="title">Partition</span> &#123;</span>&#125;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">interface</span> <span class="title">VirtualPartition</span> <span class="keyword">extends</span> <span class="title">Partition</span> &#123;</span>&#125;</div><div class="line">&#125;</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<ul>
+<li>PartitionTraversal应该代表特定分区的遍历。 我们目前这样做，但该分区只是集群中的一台机器。 我们应该推广来支持跨群集镜像的PartitionTraversals。</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">PartitionTraversal</span>&lt;<span class="title">S</span>,<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">Traversal</span>.<span class="title">Admin</span>&lt;<span class="title">S</span>,<span class="title">E</span>&gt; &#123;</span></div><div class="line">  <span class="keyword">public</span> <span class="keyword">default</span> <span class="keyword">void</span> insert(<span class="keyword">final</span> Traverser.Admin&lt;?&gt; traverser); // do something with Client/Cluster here (implementation specific to GremlinServer)</div><div class="line">  public default void accept(final Traverser.Admin&lt;?&gt; traverser) &#123;</div><div class="line">    final Step&lt;?,?&gt; step = this.getStepById(traverser.getStepId());</div><div class="line">    step.addStart(traverser.attach());</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<ul>
+<li>给出Partitions的概念，PartitionStep将能够将遍历器路由到不同的PartitionTraversals。</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PartitionStep</span>&lt;<span class="title">S</span>&gt; <span class="keyword">extends</span> <span class="title">AbstractStep</span>&lt;<span class="title">S</span>,<span class="title">S</span>&gt; &#123;</span></div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> List&lt;PartitionTraversal&gt; partitionTraversals;</div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> Partitions partitions;</div><div class="line">  <span class="keyword">private</span> <span class="keyword">final</span> Partition localPartition;</div><div class="line">  <span class="keyword">public</span> PartitionStep(<span class="keyword">final</span> Traversal.Admin traversal, <span class="keyword">final</span> Partition localPartition, <span class="keyword">final</span> List&lt;PartitionTraversal&gt; partitionTraversals) &#123;</div><div class="line">    <span class="keyword">super</span>(traversal);</div><div class="line">    <span class="keyword">this</span>.partitionTraversals = partitionTraversals;</div><div class="line">    <span class="keyword">this</span>.localPartition = localPartition;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">public</span> Traverser.Admin&lt;S&gt; processNextStart() &#123;</div><div class="line">    <span class="keyword">final</span> Traverser.Admin&lt;S&gt; traverser = <span class="keyword">this</span>.starts.next();</div><div class="line">    <span class="keyword">if</span>(traverser.get() <span class="keyword">instanceof</span> Element &amp;&amp; !<span class="keyword">this</span>.localPartition.contains(traverser.get())) &#123;</div><div class="line">      <span class="keyword">final</span> PartitionTraversal partitionTraversal = <span class="keyword">this</span>.partitionTraversals.stream().                                                                        filter(p -&gt; p.getPartition().contains(traverser.get())).                                                                          findFirst().get(); <span class="comment">// we won't use stream, but this is the basic idea</span></div><div class="line">      partitionTraversal.insert(traverser.detach());</div><div class="line">    &#125; <span class="keyword">else</span></div><div class="line">      <span class="keyword">return</span> traverser;</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<p>架构是：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&gt;                                              /--PartitionConnection-&gt;PartitionTraversal</div><div class="line">                                            /      [Client]</div><div class="line">client --RemoteConnection--&gt; RemoteTraversal----PartitionConnection-&gt;PartitionTraversal</div><div class="line">                                            \      [Client]</div><div class="line">                                             \--PartitionConnection-&gt;PartitionTraversal</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+</blockquote>
+<p> <br></p>
+<blockquote>
+<ul>
+<li>关于独特的OLTP行为，如lazy side-effects？ RemoteGraph（当前）不允许访问中间side-effects。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>RemoteGraph已经不再存在（不推荐使用）。 但是，对于RemoteTraversal.getSideEffects（）只能在完整的迭代后才能访问。 我们可以放松这个约束，并且说USER不能得到副作用（主遍历的下一个），但是“工作者遍历”可以。 总之，我们可以支持这一点，需要跟Stephen mallette谈谈。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>为了支持跨线程分割的同一台机器上的许多RemoteTraversals，可以使用IntraPartition。 这对于诸如在单机图形系统（例如，TinkerGraph）中穿越遍历或在多机器图形系统内的情况例如使用每个处理器核心来处理单个分区中的数据的情况是有用的。 一般来说，“线程化workers”。</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IntraPartition</span> <span class="keyword">implements</span> <span class="title">Partition</span> &#123;</span></div><div class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Partition parentPartition;</div><div class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Predicate&lt;Element&gt; inPartitionPredicate;</div><div class="line">	<span class="keyword">public</span> IntraPartition(<span class="keyword">final</span> Partition parentPartition, <span class="keyword">final</span> Predicate&lt;Element&gt; inPartitionPredicate) &#123;</div><div class="line">		<span class="keyword">this</span>.parentPartition = parentPartition;</div><div class="line">		<span class="keyword">this</span>.inPartitionPredicate = inPartitionPredicate;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">public</span> <span class="keyword">boolean</span> contains(<span class="keyword">final</span> Element element) &#123;</div><div class="line">		<span class="keyword">return</span> <span class="keyword">this</span>.parentPartition.contains(element) &amp;&amp; <span class="keyword">this</span>.inPartitionPredicate.test(element);</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">public</span> Iterator&lt;Vertex&gt; vertices(<span class="keyword">final</span> Object... ids) &#123;</div><div class="line">		<span class="keyword">return</span> IteratorUtils.filter(<span class="keyword">this</span>.parentPartition.vertices(ids), <span class="string">this:</span>:inPartitionPredicate);</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">public</span> Iterator&lt;Edge&gt; edges(<span class="keyword">final</span> Object... ids) &#123;</div><div class="line">		<span class="keyword">return</span> IteratorUtils.filter(<span class="keyword">this</span>.parentPartition.edges(ids), <span class="string">this:</span>:inPartitionPredicate);</div><div class="line">	&#125;</div><div class="line">	<span class="comment">////////////////////</span></div><div class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">HashPartitionPredicate</span> <span class="keyword">implements</span> <span class="title">Predicate</span>&lt;<span class="title">Element</span>&gt; &#123;</span></div><div class="line">		<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> partitionNumber;</div><div class="line">		<span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> totalPartitions;</div><div class="line">		<span class="keyword">public</span> HashPartitionPredicate(<span class="keyword">final</span> <span class="keyword">int</span> partitionNumber, <span class="keyword">final</span> <span class="keyword">int</span> totalPartitions) &#123;</div><div class="line">			<span class="keyword">this</span>.partitionNumber = partitionNumber;</div><div class="line">			<span class="keyword">this</span>.totalPartitions = totalPartitions;</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">public</span> <span class="keyword">boolean</span> test(<span class="keyword">final</span> Element element) &#123;</div><div class="line">			<span class="keyword">return</span> <span class="keyword">this</span>.partitionNumber == element.hashCode() % <span class="keyword">this</span>.totalPartitions;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&gt; &#125;</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<ul>
+<li>TinkerGraph具有单个分区作为其单个机器图系统。 但是，IntraPartition可用于创建单个全局分区的大量“内部分区”。 因此，当移动器不再在当前的分区内（线程）中时，它被路由到另一个线程进行处理。 HashPartitionPredicate确保（在原因之内）遍历所有IntraPartition线程的遍历器的负载平衡。<br>DSEGraph具有多个分区作为其多机器图形系统。 但是，IntraPartition可用于创建每个分区的大量“内部分区”。 因此，在“数据本地分区”（机器内）中的遍历器的处理在IntraPartition的线程之间进行负载平衡。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li><p>我想我们也应该调整Traversal。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"> <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Traversal</span>.<span class="title">Admin</span>&lt;<span class="title">S</span>,<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">Traversal</span>&lt;<span class="title">S</span>,<span class="title">E</span>&gt; &#123;</span></div><div class="line">  <span class="keyword">public</span> String getId();</div><div class="line">    <span class="comment">// every traversal should have a unique ID (UUID)</span></div><div class="line">    <span class="comment">// perhaps [~dkuppitz] Traversal.getMetadata() plans can support this</span></div><div class="line">  <span class="keyword">public</span> <span class="keyword">void</span> insertTraverser(<span class="keyword">final</span> Traverser.Admin&lt;?&gt; traverser);</div><div class="line">    // inserts the traverser to the right step given its traverser.getStepId()</div><div class="line">    // right now this is done via TraversalMatrix in GraphComputer. Make it native to Traversal.</div><div class="line">&#125;</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</blockquote>
+<p>&gt;</p>
+<blockquote>
+<p>此外，我认为Step.getId（）应该是一个简短的String。 这将减少迁移Traversers的网络大小。</p>
+</blockquote>
+<p> <br></p>
+<blockquote>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"> g = graph.traversal().withPartitioner()</div><div class="line">  <span class="comment">// uses graph.partitioner() to get partitions</span></div><div class="line">  <span class="comment">// this would have a single worker at each partitioner/machine</span></div><div class="line">g = graph.traversal().withPartitioner(GlobalPartitioner.instance())</div><div class="line">  <span class="comment">// what we current have (basically, default) -- there is only one partition and its the entire graph (thus, one traversal only).</span></div><div class="line">g = graph.traversal().withPartitioner(HashPartioner.of(graph.partitioner(),<span class="number">5</span>))</div><div class="line">  <span class="comment">// creates 5 subpartitions of every graph.partitioner().partitions()</span></div><div class="line">  <span class="comment">// this would be a way to create 5 workers on every partition/machine. (i.e. partition threads)</span></div><div class="line">g = graph.traversal().withPartitioner(GroupPartitioner.of(graph.partitioner(),<span class="number">2</span>))</div><div class="line">  <span class="comment">// creates 2 superpartitioners aggregating multiple partitioners underneath</span></div><div class="line">  <span class="comment">// this would create 2 workers across the cluster where each worker is responsible for 1/2 the cluster.</span></div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<ul>
+<li>这会将PartitionerStrategy添加到traverasl源的策略中，从而在分区之间生成PartitionTraversals。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>如果您通过GremlinServer发送，它将工作。 然而，注意 - GremlinServer将是多机系统的消息传递系统的默认实现。 对于单机图系统，将提供基于线程的消息传递系统。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>我经历了所有在TraversalVertexProgram中隐藏的所有操作，“操作”GraphComputer框架。 这形成了消息传递系统实现的API。 Apache TinkerPop将提供此API的线程实现和GremlinServer实现。</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Master</span> <span class="keyword">extends</span> <span class="title">Router</span> &#123;</span></div><div class="line">	<span class="comment">// send side-effect data to workers</span></div><div class="line">	<span class="keyword">public</span> <span class="keyword">void</span> sideEffect(<span class="keyword">final</span> String key, <span class="keyword">final</span> Object value);</div><div class="line">	<span class="comment">// when a barrier is complete, unlock it</span></div><div class="line">	<span class="keyword">public</span> <span class="keyword">void</span> unlock(<span class="keyword">final</span> Barrier barrier);</div><div class="line">	<span class="comment">// the computation is complete and shutdown all workers</span></div><div class="line">	<span class="keyword">public</span> <span class="keyword">void</span> stop();</div><div class="line">&#125;</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Worker</span> <span class="keyword">extends</span> <span class="title">Router</span> &#123;</span></div><div class="line">	<span class="comment">// send worker-partial side-effect data back to master</span></div><div class="line">	<span class="keyword">public</span> <span class="keyword">void</span> sideEffect(<span class="keyword">final</span> String key, <span class="keyword">final</span> Object partialValue);</div><div class="line">	<span class="comment">// lock at the respective barrier step and send barrier data to master</span></div><div class="line">	<span class="keyword">public</span> <span class="keyword">void</span> lock(<span class="keyword">final</span> Barrier barrier);</div><div class="line">	<span class="comment">// no more traversers in the worker's partition so it should try and shutdown</span></div><div class="line">	<span class="keyword">public</span> <span class="keyword">void</span> voteToStop();</div><div class="line">&#125;</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+</blockquote>
+<p> <br></p>
+<blockquote>
+<ul>
+<li>关于分布式事务，这是一件相当困难的事情。 “分布式”OLTP“中的”T“是什么意思？<br>至少对于Sqlg的后端，不可能跨多个线程/ rdbms连接运行一个事务。 但是可能在Java中使用JTA和XA事务管理器。 每个线程/连接将获得自己的XA数据源，事务管理器将通过两阶段提交来处理事务边界。 所有这一切在外面的TinkerPop虽然。 它也增加了一个巨大的复杂性，永远不会消失。<br>所以对于初学者，我想象分布式遍历将只读或者只是违反常规事务边界？<br>我不是在这里想到GremlinServer，而是本来就是运行gremlin遍历。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>我昨天正在阅读关于两个阶段提交， - 呃 - 高兴。 我认为我们需要在我们深入实施之前合理的规划交易策略。 我不认为“它能工作，但它是只读的遍历”是一个很好的说法，所以我倾向于去解决抛出异常的分区遍历的突变步骤的情况。 我想这些可以以这样的方式路由，他们只是像常规遍历一样工作，以避免异常，但是我认为在这里我认为3.3.0特性值得思考。 我的意思是我们已经在“远程”遍历时遇到了事务边界问题。 也许这个问题需要作为思考的一部分来解决。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>我从来没有使用TinkerPop来做OLAP，目前是否有任何支持事务的OLAP实现？<br>如果我们谈论事务，我们是指ACID或者一些较弱的，例如。 最终一致，形式呢？<br>我知道的唯一真正分布式的ACID系统是cockroachdb。 它非常有趣和复杂（筏共识和所有这一切）。 但是，是实际的事务/数据库语义之上的不是Tinkerpop所擅长的。<br>如果GremlinServer将成为管理许多远程数据源的事务边界的事务管理器，那么它非常接近JTA 2阶段XA规范。 我记得很久以前，Neo4j支持它。 如果我记得正确，Neo4j的事务实现是一个“正确的”JTA规范实现。<br>接下来的困惑是，对于跨线程的OLTP，不是机器，类似的事务管理器将必须存在于gremlin-core中？</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>我认为用于分布式OLTP /查询路由的最佳并发抽象是actor模型。 在这种并发模式中，顺序进程（actors）通过消息传递异步通信。 值得注意的是，我们目前在GraphComputer OLAP中使用的模型保存在GraphComputer通信中是同步（大容量同步并行），“actors”是顶点。 在提出的这张票的模型中，通信将是异步的，演员是分区（或遍历）。 也就是说，每个演员都将拥有自己的遍历克隆。 消息是遍历器。 当消息到达遍历时，它们被插入遍历流（Step.addStart（Traverser））并被处理，直到遍历器不再引用当前分区中的Element。 在这一点上，分区/遍历/ actor会将遍历器/消息发送到包含该元素（数据本地计算）的相应分区遍历。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>我已经研究了Java中的actor框架，并且它是一个相当稀疏的场景：<a href="http://www.javaworld.com/article/2078020/java-concurrency/understanding-actor-concurrency-part-2-actors-on-the-jvm" target="_blank" rel="external">http://www.javaworld.com/article/2078020/java-concurrency/understanding-actor-concurrency-part-2-actors-on-the-jvm</a> .html。 最抛光/稳定的图书馆似乎是Akka（<a href="http://akka.io/）。" target="_blank" rel="external">http://akka.io/）。</a> 如何使用GremlinServer对我来说不是很明显（cc / @spmallette）。 无论如何，我不认为我们应该在GremlinServer上尝试和编写自己的actor框架。 有太多的并发问题需要考虑，好的，我不是一个很好的并行/分布式程序员。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&gt; Partition (subgraph/machine bound)</div><div class="line">  Traversal (thread bound)</div><div class="line">    Step (actor bound)</div><div class="line">    Traverser (message bound)</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<ul>
+<li>以这种方式，步骤彼此通信，无论移动器的下一步是本地还是远程。 问题变得，如此之多的消息通信是昂贵的，大多数分步图中的消息传递都是本地的。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>在Akka中，remoting使用以下URISchema：</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="string">akka:</span><span class="comment">//&lt;actor system&gt;@&lt;hostname&gt;:&lt;port&gt;/&lt;actor path&gt;</span></div><div class="line">&gt;</div></pre></td></tr></table></figure>
+</blockquote>
+<p>&gt;</p>
+<blockquote>
+<p>映射到Tinkerpop中：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="string">akka:</span><span class="comment">//traversals@88.88.88.88:8888/f6609a45-4e76-4fbd-b5a2-073490bb5081/2435</span></div><div class="line">       traverser routing system</div><div class="line">                  Partition.getLocation()</div><div class="line">                              Port is configurable</div><div class="line">                                    Traversal UUID</div><div class="line">                                                                         Step ID</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>这是一个重要的区别：<br>分布式OLTP是“以分区为中心”（涉及到数据）和“以进程为中心”（涉及到处理）。<br>GraphComputer OLAP是“以顶点为中心”（当涉及到数据）和“以顶点为中心”（涉及到处理）。<br>在GraphComputer中，顶点是执行点，它只能在需要消息传递之前在其星形图中处理。<br>在分布式OLTP中，遍历器是执行点，它只能在需要消息传递之前在其机器分区中进行处理。</li>
+</ul>
+</blockquote>
+<p><br></p>
+<blockquote>
+<ul>
+<li>以下是一些同事围绕“分布式OLTP的动机”的电子邮件的摘要。</li>
+<li>1.子图计算与顶点中心计算。(1)如果不要离开分区/机器，则不需要传递消息。<br>我们在Gremlin OLAP中有很多join()，(2)如果边界是分区而不是顶点，则不需要。</li>
+<li>2.移除Star Graph约束。目前在Gremlin中有两种方式处理事情，OLTP，OLAP</li>
+<li>3.批量同步处理与异步处理。（1）目前GraphComputer中的每一次迭代都受到最慢的顶点约束。<br>（2）使用Gremlin，我们知道什么时候barrier（障碍步骤），所以我们有奢侈的ASP语义。</li>
+<li>4.当您甚至不需要数据时，将整个图形迁移到RDD / SequenceFile中。</li>
+<li>5.查询路由,我们目前没有查询路由功能。 该提案提供了step-by-step的查询路由。 始终“数据本地”处理。</li>
+<li>6.利用供应商优化。（1）OLAP是关于StarGraph的。 我们没有以顶点为中心的索引，排序顺序等。<br>（2）在分布式OLTP中，供应商采用相同的策略。<br>（3）在极限情况下，没有更多的“if（TraversalHelper.onGraphComputer（））做另外一件事”（设计策略时）。</li>
+<li>7.内存问题急切需要评估：如果您无法批量所有Message，那么您可以拥有Message pools。<br>这就是为什么Gremlin OLAP中的路径分析是讨厌的原因。 在OLTP中也是令人讨厌的，但是您有懒惰计算/障碍的好处，因此不会遇到相同的内存问题。<br>使用ASP，运行程序可以停止等待处理，直到内存被释放，因此我们在此模型中进行懒惰评估。</li>
+<li>所以，遍历g.V（）。out（）。count（）非常有利于线性扫描数据处理，就像我们看到的Spark / Hadoop / etc。 你触摸一切 - 和/或你知道你会在每次迭代触摸。 还有其他问题，但这是我认为Gremlin OLAP比分布式Gremlin OLTP更好（从理论上讲到目前为止）。</li>
+<li>现在，假设:</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; g.V().match(a,b,c,d).select(...).</div><div class="line">&gt;</div></pre></td></tr></table></figure>
+<ul>
+<li>分布式OLTP最适合这种遍历，因为：<br><br>（1）match（）使用Matthias在他的Ph.D开发的“基于成本的算法”。 论文。 虽然有几个内省的调整，我们知道Gremlin VM如何处理。</li>
+</ul>
+</blockquote>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/TinkerPop/" rel="tag"># TinkerPop</a>
+          
+            <a href="/tags/Graph/" rel="tag"># Graph</a>
+          
+            <a href="/tags/TP/" rel="tag"># TP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/01/TinkerPop3-文档-3-2-4/" rel="next" title="TinkPop 文档 3.2.4">
+                <i class="fa fa-chevron-left"></i> TinkPop 文档 3.2.4
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/07/ArrayList与LinkedList的区别/" rel="prev" title="ArrayList与LinkedList的区别">
+                ArrayList与LinkedList的区别 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://avatars1.githubusercontent.com/u/10528403?v=3&s=460"
+               alt="Troy" />
+          <p class="site-author-name" itemprop="name">Troy</p>
+           
+              <p class="site-description motion-element" itemprop="description">路漫漫，水迢迢</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/hsh8523" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#描述"><span class="nav-number">1.</span> <span class="nav-text">描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他信息"><span class="nav-number">2.</span> <span class="nav-text">其他信息</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Troy</span>
+</div>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

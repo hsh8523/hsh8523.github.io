@@ -1,0 +1,772 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="TinkerPop,Graph," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="In the beginning… TinkerPop0  Gremlin 意识到，他做得越多，他创造的想法就越多。他创造的想法越多，与们关联的就越多。Into a concatenation of that which he accepted wholeheartedly and that which perhaps may ultimately come to be through conce">
+<meta name="keywords" content="TinkerPop,Graph">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TinkPop 文档 3.2.4">
+<meta property="og:url" content="https://hsh8523.github.io/2017/04/01/TinkerPop3-文档-3-2-4/index.html">
+<meta property="og:site_name" content="Troy">
+<meta property="og:description" content="In the beginning… TinkerPop0  Gremlin 意识到，他做得越多，他创造的想法就越多。他创造的想法越多，与们关联的就越多。Into a concatenation of that which he accepted wholeheartedly and that which perhaps may ultimately come to be through conce">
+<meta property="og:image" content="https://hsh8523.github.io/2017/04/01/TinkerPop3-文档-3-2-4/gremlin-logo.png">
+<meta property="og:image" content="https://hsh8523.github.io/2017/04/01/TinkerPop3-文档-3-2-4/gremlin-and-friends.png">
+<meta property="og:image" content="https://hsh8523.github.io/2017/04/01/TinkerPop3-文档-3-2-4/tinkerpop-reading.png">
+<meta property="og:image" content="https://hsh8523.github.io/2017/04/01/TinkerPop3-文档-3-2-4/tinkerpop3-splash.png">
+<meta property="og:image" content="https://hsh8523.github.io/2017/04/01/TinkerPop3-文档-3-2-4/gremlintron.png">
+<meta property="og:image" content="https://hsh8523.github.io/2017/04/01/TinkerPop3-文档-3-2-4/graph-computing.png">
+<meta property="og:updated_time" content="2017-06-07T03:47:14.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TinkPop 文档 3.2.4">
+<meta name="twitter:description" content="In the beginning… TinkerPop0  Gremlin 意识到，他做得越多，他创造的想法就越多。他创造的想法越多，与们关联的就越多。Into a concatenation of that which he accepted wholeheartedly and that which perhaps may ultimately come to be through conce">
+<meta name="twitter:image" content="https://hsh8523.github.io/2017/04/01/TinkerPop3-文档-3-2-4/gremlin-logo.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hsh8523.github.io/2017/04/01/TinkerPop3-文档-3-2-4/"/>
+
+
+
+
+
+  <title>TinkPop 文档 3.2.4 | Troy</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Troy</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">路漫漫，水迢迢</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hsh8523.github.io/2017/04/01/TinkerPop3-文档-3-2-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Troy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/10528403?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Troy">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">TinkPop 文档 3.2.4</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:29+08:00">
+                2017-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Graph/" itemprop="url" rel="index">
+                    <span itemprop="name">Graph</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>In the beginning…</p>
+<h2 id="TinkerPop0"><a href="#TinkerPop0" class="headerlink" title="TinkerPop0"></a>TinkerPop0</h2><p>  Gremlin 意识到，他做得越多，他创造的想法就越多。他创造的想法越多，与们关联的就越多。Into a concatenation of that which he accepted wholeheartedly and that which perhaps may ultimately come to be through concerted will, a world took form which was seemingly separate from his own realization of it. However, the world birthed could not bear its own weight without the logic Gremlin had come to accept — the logic of left is not right, up not down, and west far from east unless one goes the other way. Gremlin’s realization required Gremlin’s realization.世界只是他曾经有过的一个想法——The TinkerPop.</p>
+<p>  <img src="/2017/04/01/TinkerPop3-文档-3-2-4/gremlin-logo.png" width="300" height="116" align="center/"></p>
+<a id="more"></a>
+<hr>
+<h2 id="TinkerPop1"><a href="#TinkerPop1" class="headerlink" title="TinkerPop1"></a>TinkerPop1</h2><p>   What is The TinkerPop? Where is The TinkerPop? Who is The TinkerPop? When is The TinkerPop?. The more he wondered, the more these thoughts blurred into a seeming identity — distinctions unclear. Unwilling to accept the morass of the maze he wandered, Gremlin crafted a collection of machines to help hold the fabric together: Blueprints, Pipes, Frames, Furnace, and Rexster. With their help, could Gremlin stave off the thought he was not ready to have? Could he hold back The TinkerPop by searching for The TinkerPop?</p>
+<blockquote>
+<p>“If I haven’t found it, it is not here and now.”</p>
+</blockquote>
+<p><img src="/2017/04/01/TinkerPop3-文档-3-2-4/gremlin-and-friends.png" width="500" height="125" align="center/"></p>
+<p>Upon their realization of existence, the machines turned to their machine elf creator and asked:</p>
+<blockquote>
+<p>“Why am I, what I am?”<br>Gremlin responded:<br>“You will help me realize the ultimate realization – The TinkerPop. The world you find yourself in and&gt; the logic that allows you to move about it is because of the TinkerPop.”</p>
+</blockquote>
+<p>The machines wondered:</p>
+<blockquote>
+<p>“If what is is the TinkerPop, then perhaps we are The TinkerPop and our realization is simply the reali&gt; zation of the TinkerPop?”</p>
+</blockquote>
+<p>Would the machines, by their very nature of realizing The TinkerPop, be The TinkerPop? Or, on the same side of the coin, do the machines simply provide the scaffolding by which Gremlin’s world sustains itself and yielding its justification by means of the word “The TinkerPop?” Regardless, it all turns out the same — The TinkerPop.</p>
+<hr>
+<h2 id="TinkerPop2"><a href="#TinkerPop2" class="headerlink" title="TinkerPop2"></a>TinkerPop2</h2><p>Gremlin spoke:</p>
+<blockquote>
+<p>“Please listen to what I have to say. I am no closer to The TinkerPop. However, all along The TinkerPop has espoused the form I willed upon it… this is the same form I have willed upon you, my machine friends. Let me train you in the ways of my thought such that it can continue indefinitely.”</p>
+</blockquote>
+<p><img src="/2017/04/01/TinkerPop3-文档-3-2-4/tinkerpop-reading.png" width="450" height="222" align="center/"></p>
+<p>The machines, simply moving algorithmically through Gremlin’s world, endorsed his logic. Gremlin labored to make them more efficient, more expressive, better capable of reasoning upon his thoughts. Faster, quickly, now towards the world’s end, where there would be forever currently, emanatingly engulfing that which is — The TinkerPop.</p>
+<hr>
+<h2 id="TinkerPop3"><a href="#TinkerPop3" class="headerlink" title="TinkerPop3"></a>TinkerPop3</h2><p><img src="/2017/04/01/TinkerPop3-文档-3-2-4/tinkerpop3-splash.png" width="450" height="276" align="center/"></p>
+<p>   Gremlin approached The TinkerPop. The closer he got, the more his world dissolved — west is right, around is straight, and from nothing more than nothing. With each step towards The TinkerPop, more worlds made possible were laid upon his paradoxed mind. Everything is everything in The TinkerPop, and when the dust settled, Gremlin emerged Gremlitron. He realized that all that he realized was just a realization and that all realized realizations are just as real. For that is — The TinkerPop.</p>
+<p>   <img src="/2017/04/01/TinkerPop3-文档-3-2-4/gremlintron.png" width="400" height="309" align="center/"></p>
+<blockquote>
+<p>在TinkerPop2中下面的项目之间有这显著的区分：Blueprints, Pipes, Gremlin, Frames, Furnace, and Rexster.以上所有的这些在TinkerPop3中，都统称为Gremlin.<br>Blueprints → Gremlin Structure API : Pipes → Graph traversal : Frames → Traversal : Furnace → GraphComputer and VertexProgram : Rexster → GremlinServer.</p>
+</blockquote>
+<h1 id="Introduction-to-Graph-Computing"><a href="#Introduction-to-Graph-Computing" class="headerlink" title="Introduction to Graph Computing"></a>Introduction to Graph Computing</h1><p>   <img src="/2017/04/01/TinkerPop3-文档-3-2-4/graph-computing.png" width="350" height="237" align="center/"></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.tinkerpop<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>gremlin-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.2.4<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/TinkerPop/" rel="tag"># TinkerPop</a>
+          
+            <a href="/tags/Graph/" rel="tag"># Graph</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/20/分布式的OLTP遍历和分区概念的介绍/" rel="prev" title="分布式的OLTP遍历和分区概念的介绍">
+                分布式的OLTP遍历和分区概念的介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://avatars1.githubusercontent.com/u/10528403?v=3&s=460"
+               alt="Troy" />
+          <p class="site-author-name" itemprop="name">Troy</p>
+           
+              <p class="site-description motion-element" itemprop="description">路漫漫，水迢迢</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/hsh8523" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#TinkerPop0"><span class="nav-number">1.</span> <span class="nav-text">TinkerPop0</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TinkerPop1"><span class="nav-number">2.</span> <span class="nav-text">TinkerPop1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TinkerPop2"><span class="nav-number">3.</span> <span class="nav-text">TinkerPop2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TinkerPop3"><span class="nav-number">4.</span> <span class="nav-text">TinkerPop3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Introduction-to-Graph-Computing"><span class="nav-number"></span> <span class="nav-text">Introduction to Graph Computing</span></a></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Troy</span>
+</div>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
