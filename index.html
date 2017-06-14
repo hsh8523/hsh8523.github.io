@@ -277,6 +277,170 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://hsh8523.github.io/2017/06/14/docker使用基础教程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Troy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/10528403?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Troy">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/06/14/docker使用基础教程/" itemprop="url">docker使用基础教程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-14T17:24:32+08:00">
+                2017-06-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/docker/" itemprop="url" rel="index">
+                    <span itemprop="name">docker</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1-安装与配置-Docker"><a href="#1-安装与配置-Docker" class="headerlink" title="1 安装与配置 Docker"></a>1 安装与配置 Docker</h1><h2 id="安装-Docker"><a href="#安装-Docker" class="headerlink" title="安装 Docker"></a>安装 Docker</h2><p>Docker 软件包已经包括在默认的 CentOS-Extras 软件源里。因此想要安装 docker，只需要运行下面的 yum 命令：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum install docker-io -y</div></pre></td></tr></table></figure>
+<p>直接yum安装，安装成功后查看版本</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker -v</div></pre></td></tr></table></figure>
+<p>启动docker</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">service docker <span class="built_in">start</span></div></pre></td></tr></table></figure>
+<p>设置开机启动</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">chkconfig docker on</div></pre></td></tr></table></figure>
+<h2 id="配置-Docker"><a href="#配置-Docker" class="headerlink" title="配置 Docker"></a>配置 Docker</h2><p>因为国内访问 Docker Hub 较慢, 可以使用腾讯云提供的国内镜像源, 加速访问 Docker Hub<br>依次执行以下命令</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">echo</span> "OPTIONS='--registry-mirror=https://mirror.ccs.tencentyun.com'" &gt;&gt; /etc/sysconfig/docker</div></pre></td></tr></table></figure>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">systemctl daemon-reload</div></pre></td></tr></table></figure>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">service docker restart</div></pre></td></tr></table></figure>
+<h1 id="2-Docker-的简单操作"><a href="#2-Docker-的简单操作" class="headerlink" title="2 Docker 的简单操作"></a>2 Docker 的简单操作</h1><h2 id="下载镜像"><a href="#下载镜像" class="headerlink" title="下载镜像"></a>下载镜像</h2><p>下载一个官方的 CentOS 镜像到本地</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker pull centos</div></pre></td></tr></table></figure>
+<p>下载好的镜像就会出现在镜像列表里</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker images</div></pre></td></tr></table></figure>
+<h2 id="运行容器"><a href="#运行容器" class="headerlink" title="运行容器"></a>运行容器</h2><p>这时我们可以在刚才下载的 CentOS 镜像生成的容器内操作了。<br>生成一个 centos 镜像为模板的容器并使用 bash shell</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run -it centos /bin/bash</div></pre></td></tr></table></figure>
+<p>这个时候可以看到命令行的前端已经变成了 [root@(一串 hash Id)] 的形式, 这说明我们已经成功进入了 CentOS 容器。<br>在容器内执行任意命令, 不会影响到宿主机, 如下</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">mkdir</span> -p /data/simple_docker</div></pre></td></tr></table></figure>
+<p>可以看到 /data 目录下已经创建成功了 simple_docker 文件夹</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ls /data</div></pre></td></tr></table></figure>
+<p>退出容器</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">exit</span></div></pre></td></tr></table></figure>
+<p>查看宿主机的 /data 目录, 并没有 simple_docker 文件夹, 说明容器内的操作不会影响到宿主机</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ls /data</div></pre></td></tr></table></figure>
+<h2 id="保存容器"><a href="#保存容器" class="headerlink" title="保存容器"></a>保存容器</h2><p>查看所有的容器信息， 能获取容器的id</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker ps -a</div></pre></td></tr></table></figure>
+<p>然后执行如下命令<br>，保存镜像：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker commit -m="备注" 你的CONTAINER_ID 你的IMAGE</div></pre></td></tr></table></figure>
+<p>大功告成！</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="https://hsh8523.github.io/2017/06/14/py4j实现java调用python/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -366,17 +530,17 @@
 
       
         
-          
-            <p>更多详情参考：<a href="https://www.py4j.org/advanced_topics.html#initiating-the-communication-from-the-java-side" target="_blank" rel="external">https://www.py4j.org/advanced_topics.html#initiating-the-communication-from-the-java-side</a></p>
+          <p>更多详情参考：<a href="https://www.py4j.org/advanced_topics.html#initiating-the-communication-from-the-java-side" target="_blank" rel="external">https://www.py4j.org/advanced_topics.html#initiating-the-communication-from-the-java-side</a></p>
 <h1 id="Using-the-traditional-JavaGateway-GatewayServer"><a href="#Using-the-traditional-JavaGateway-GatewayServer" class="headerlink" title="Using the traditional JavaGateway/GatewayServer"></a>Using the traditional JavaGateway/GatewayServer</h1><p>java 端代码</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">SayHello</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">()</span></span>;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">(<span class="keyword">int</span> i, String s)</span></span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExampleClientApplication</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        GatewayServer.turnLoggingOff();</div><div class="line">        GatewayServer server = <span class="keyword">new</span> GatewayServer();</div><div class="line">        server.start();</div><div class="line">        SayHello hello = (SayHello) server.getPythonServerEntryPoint(<span class="keyword">new</span> Class[]&#123;SayHello.class&#125;);</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            System.out.println(hello.sayHello());</div><div class="line">            System.out.println(hello.sayHello(<span class="number">2</span>, <span class="string">"Hello World"</span>));</div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        server.shutdown();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>python  端代码</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleHello</span><span class="params">(object)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">sayHello</span><span class="params">(self, int_value=None, string_value=None)</span>:</span></div><div class="line">        print(int_value, string_value)</div><div class="line">        <span class="keyword">return</span> <span class="string">"Said hello to &#123;0&#125;"</span>.format(string_value)</div><div class="line"></div><div class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Java</span>:</span></div><div class="line">        implements = [<span class="string">"py4j.examples.SayHello"</span>]</div><div class="line"></div><div class="line"><span class="comment"># Make sure that the python code is started first.</span></div><div class="line"><span class="comment"># Then execute: java -cp py4j.jar py4j.examples.SingleThreadClientApplication</span></div><div class="line"><span class="keyword">from</span> py4j.java_gateway <span class="keyword">import</span> JavaGateway, CallbackServerParameters</div><div class="line">simple_hello = SimpleHello()</div><div class="line">gateway = JavaGateway(</div><div class="line">    callback_server_parameters=CallbackServerParameters(),</div><div class="line">    python_server_entry_point=simple_hello)</div></pre></td></tr></table></figure>
-<h1 id="Using-ClientServer"><a href="#Using-ClientServer" class="headerlink" title="Using ClientServer"></a>Using ClientServer</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">// IHello.java</span></div><div class="line"><span class="keyword">package</span> py4j.examples;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IHello</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">()</span></span>;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">(<span class="keyword">int</span> i, String s)</span></span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// SingleThreadClientApplication.java</span></div><div class="line"><span class="keyword">package</span> py4j.examples;</div><div class="line"></div><div class="line"><span class="keyword">import</span> py4j.ClientServer;</div><div class="line"><span class="keyword">import</span> py4j.GatewayServer;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SingleThreadClientApplication</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        ClientServer clientServer = <span class="keyword">new</span> ClientServer(<span class="keyword">null</span>);</div><div class="line">        <span class="comment">// We get an entry point from the Python side</span></div><div class="line">        IHello hello = (IHello) clientServer.getPythonServerEntryPoint(<span class="keyword">new</span> Class[] &#123; IHello.class &#125;);</div><div class="line">        <span class="comment">// Java calls Python without ever having been called from Python</span></div><div class="line">        System.out.println(hello.sayHello());</div><div class="line">        System.out.println(hello.sayHello(<span class="number">2</span>, <span class="string">"Hello World"</span>));</div><div class="line">        clientServer.shutdown();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleHello</span><span class="params">(object)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">sayHello</span><span class="params">(self, int_value=None, string_value=None)</span>:</span></div><div class="line">        print(int_value, string_value)</div><div class="line">        <span class="keyword">return</span> <span class="string">"Said hello to &#123;0&#125;"</span>.format(string_value)</div><div class="line"></div><div class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Java</span>:</span></div><div class="line">        implements = [<span class="string">"py4j.examples.IHello"</span>]</div><div class="line"></div><div class="line"><span class="comment"># Make sure that the python code is started first.</span></div><div class="line"><span class="comment"># Then execute: java -cp py4j.jar py4j.examples.SingleThreadClientApplication</span></div><div class="line"><span class="keyword">from</span> py4j.clientserver <span class="keyword">import</span> ClientServer, JavaParameters, PythonParameters</div><div class="line">simple_hello = SimpleHello()</div><div class="line">gateway = ClientServer(</div><div class="line">    java_parameters=JavaParameters(),</div><div class="line">    python_parameters=PythonParameters(),</div><div class="line">    python_server_entry_point=simple_hello)</div></pre></td></tr></table></figure>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/06/14/py4j实现java调用python/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1014,7 +1178,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1025,7 +1189,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1036,7 +1200,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
