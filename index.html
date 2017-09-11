@@ -367,12 +367,12 @@
       
         
           
-            <blockquote>
+            <h2 id="增加配置"><a href="#增加配置" class="headerlink" title="增加配置"></a>增加配置</h2><blockquote>
 <ul>
 <li>vi ~/.cassandra/cqlshrc</li>
 </ul>
 </blockquote>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[connection]</div><div class="line">hostname = <span class="number">192.168</span><span class="number">.1</span><span class="number">.6</span></div><div class="line">port = <span class="number">9042</span></div><div class="line">; factory = cqlshlib.kerberos_ssl.kerberos_ssl_transport_factory</div><div class="line"></div><div class="line">; [kerberos]</div><div class="line">; hostname = <span class="number">192.168</span><span class="number">.1</span><span class="number">.6</span></div><div class="line">; service = cassandra</div><div class="line">; optional</div><div class="line">; principal = bill/cassandra-admin<span class="meta">@foo</span>.example.com</div></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[connection]</div><div class="line">hostname = 192.168.1.6 #cassandra 监听地址</div><div class="line">port = 9042</div><div class="line">; factory = cqlshlib.kerberos_ssl.kerberos_ssl_transport_factory</div><div class="line"></div><div class="line">; [kerberos]</div><div class="line">; hostname = 192.168.1.6</div><div class="line">; service = cassandra</div><div class="line">; optional</div><div class="line">; principal = bill/cassandra-admin@foo.example.com</div></pre></td></tr></table></figure>
 
           
         
